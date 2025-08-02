@@ -1,0 +1,3 @@
+[submodule "libs/truelayer-dotnet-data"]
+	path = libs/truelayer-dotnet-data
+	url = https://github.com/antoniovalentini/truelayer-dotnet-data.git

@@ -1,0 +1,12 @@
+﻿<!-- Colors.xaml -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Define custom colors -->
+  <Color x:Key="Lavender">#bbb9fb</Color>
+  <Color x:Key="Charcoal">#1f1f25</Color>
+  <Color x:Key="PureWhite">#f5f4ee</Color>
+
+  <!-- Optionally define brushes -->
+  <SolidColorBrush x:Key="LavenderBrush" Color="{StaticResource Lavender}" />
+  <SolidColorBrush x:Key="CharcoalBrush" Color="{StaticResource Charcoal}" />
+  <SolidColorBrush x:Key="PureWhiteBrush" Color="{StaticResource PureWhite}" />
+</ResourceDictionary>

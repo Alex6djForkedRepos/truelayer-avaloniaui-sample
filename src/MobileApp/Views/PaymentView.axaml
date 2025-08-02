@@ -1,0 +1,382 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MobileApp.ViewModels"
+             xmlns:design="clr-namespace:MobileApp.ViewModels.Design"
+             xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="960"
+             Background="#F8F9FA"
+             x:Class="MobileApp.Views.PaymentView"
+             x:DataType="vm:PaymentViewModel">
+  <Design.DataContext>
+    <design:DesignPaymentViewModel />
+  </Design.DataContext>
+
+  <dialogHost:DialogHost CloseOnClickAway="True" IsOpen="{Binding IsDialogOpen}"
+                         Background="{DynamicResource Charcoal}" Foreground="{DynamicResource PureWhite}"
+                         dialogHost:DialogHostStyle.CornerRadius="12">
+
+    <!-- Actual dialog content -->
+    <dialogHost:DialogHost.DialogContent>
+      <Grid RowDefinitions="Auto, *">
+        <Button HorizontalAlignment="Right" CornerRadius="10" Command="{Binding CloseDialogCommand}"
+                Background="{DynamicResource Lavender}" Foreground="{DynamicResource Charcoal}"
+                Margin="0 5 5 0">
+          <PathIcon Data="{DynamicResource DismissCircleRegular}" />
+          <Button.Styles>
+            <Style Selector="Button:pointerover /template/ ContentPresenter, Button:pressed /template/ ContentPresenter">
+              <Setter Property="Background" Value="{DynamicResource PureWhite}"/>
+            </Style>
+          </Button.Styles>
+        </Button>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto, *, Auto, Auto, Auto" Margin="20 0 20 20" Name="BeneficiaryDialogGrid">
+          <TextBlock Grid.Row="0" Text="Select a beneficiary"
+                     FontSize="22"
+                     FontWeight="SemiBold"
+                     Foreground="{DynamicResource PureWhite}"
+                     Margin="0 0 0 10"/>
+
+          <ListBox Grid.Row="1" ItemsSource="{Binding Beneficiaries}" SelectedItem="{Binding SelectedBeneficiary}">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Grid ColumnDefinitions="*, Auto">
+                  <StackPanel Orientation="Vertical" Spacing="5">
+                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="14"/>
+                    <TextBlock Text="{Binding Iban}" TextWrapping="Wrap" FontWeight="Light" FontSize="12"/>
+                    <TextBlock Text="{Binding Alias}" TextWrapping="Wrap" FontWeight="Light" FontStyle="Italic" FontSize="11"/>
+                  </StackPanel>
+                  <Button Grid.Column="1" Background="#e10f70" CornerRadius="5"
+                          Command="{Binding $parent[ListBox].((vm:PaymentViewModel)DataContext).DeleteBeneficiaryCommand}"
+                          CommandParameter="{Binding .}">
+                    <PathIcon Data="{DynamicResource DeleteRegular}" Foreground="White"/>
+                    <Button.Styles>
+                      <Style Selector="Button:pointerover /template/ ContentPresenter, Button:pressed /template/ ContentPresenter">
+                        <Setter Property="Background" Value="#f776b3"/>
+                      </Style>
+                    </Button.Styles>
+                  </Button>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <TextBlock Grid.Row="2" Text="New beneficiary"
+                     FontSize="14"
+                     FontWeight="SemiBold"
+                     Foreground="{DynamicResource PureWhite}"
+                     Margin="0 16 0 10"/>
+
+          <StackPanel Grid.Row="3" Spacing="10">
+            <TextBox Watermark="Beneficiary Name" Text="{Binding NewBeneficiaryName}" FontSize="12"/>
+            <TextBox Watermark="Beneficiary IBAN" Text="{Binding NewBeneficiaryIban}" FontSize="12"/>
+            <TextBox Watermark="Beneficiary Alias" Text="{Binding NewBeneficiaryAlias}" FontSize="12"/>
+          </StackPanel>
+
+          <!-- Add Beneficiary Button -->
+          <Button Grid.Row="4" Command="{Binding AddBeneficiaryCommand}"
+                  HorizontalAlignment="Stretch"
+                  HorizontalContentAlignment="Stretch"
+                  VerticalContentAlignment="Center"
+                  FontSize="12"
+                  FontWeight="SemiBold"
+                  Background="{DynamicResource Lavender}"
+                  Foreground="{DynamicResource Charcoal}"
+                  BorderThickness="0"
+                  CornerRadius="30"
+                  Margin="0,16,0,0">
+            <Button.Styles>
+              <Style Selector="Button:pointerover /template/ ContentPresenter, Button:pressed /template/ ContentPresenter">
+                <Setter Property="Background" Value="#7392f9"/>
+              </Style>
+            </Button.Styles>
+            <TextBlock Text="Add new beneficiary" HorizontalAlignment="Center" />
+          </Button>
+        </Grid>
+      </Grid>
+    </dialogHost:DialogHost.DialogContent>
+
+    <!-- Main content -->
+    <ScrollViewer>
+      <StackPanel Spacing="18" Margin="20">
+        <!-- Header -->
+        <Grid ColumnDefinitions="*,*,*,*">
+          <Image Grid.Column="1" Grid.ColumnSpan="2"
+                 Source="avares://MobileApp/Assets/PayByBank_Logotype_black.png"
+                 Margin="0 0 0 16"
+                 HorizontalAlignment="Stretch"/>
+        </Grid>
+
+        <!-- Payment Provider -->
+        <StackPanel Spacing="8">
+          <TextBlock Text="Payment Provider"
+                     FontWeight="SemiBold"
+                     FontSize="14"
+                     Foreground="#374151"/>
+          <ComboBox ItemsSource="{Binding PaymentProviders}"
+                    SelectedItem="{Binding SelectedPaymentProvider}"
+                    PlaceholderText="Select a payment provider"
+                    HorizontalAlignment="Stretch"
+                    Height="44"
+                    FontSize="14"
+                    Background="White"
+                    BorderBrush="#D1D5DB"
+                    BorderThickness="1"
+                    CornerRadius="8"/>
+        </StackPanel>
+
+        <!-- Scheme, Currency and Amount Row -->
+        <Grid ColumnDefinitions="2*, 16, *, 16, *">
+          <!-- Payment Scheme -->
+          <StackPanel Spacing="8" Grid.Column="0">
+            <TextBlock Text="Payment Scheme"
+                       FontWeight="SemiBold"
+                       FontSize="14"
+                       Foreground="#374151"/>
+            <ComboBox ItemsSource="{Binding PaymentSchemes}"
+                      SelectedItem="{Binding SelectedPaymentScheme}"
+                      PlaceholderText="Select payment scheme"
+                      HorizontalAlignment="Stretch"
+                      Height="44"
+                      FontSize="14"
+                      Background="White"
+                      BorderBrush="#D1D5DB"
+                      BorderThickness="1"
+                      CornerRadius="8"/>
+          </StackPanel>
+
+          <!-- Currency -->
+          <StackPanel Grid.Column="2" Spacing="8">
+            <TextBlock Text="Currency"
+                       FontWeight="SemiBold"
+                       FontSize="14"
+                       Foreground="#374151"/>
+            <ComboBox ItemsSource="{Binding Currencies}"
+                      SelectedItem="{Binding SelectedCurrency}"
+                      PlaceholderText="Currency"
+                      HorizontalAlignment="Stretch"
+                      Height="44"
+                      FontSize="14"
+                      Background="White"
+                      BorderBrush="#D1D5DB"
+                      BorderThickness="1"
+                      CornerRadius="8"/>
+          </StackPanel>
+
+          <!-- Amount -->
+          <StackPanel Grid.Column="4" Spacing="8">
+            <TextBlock Text="Amount"
+                       FontWeight="SemiBold"
+                       FontSize="14"
+                       Foreground="#374151"/>
+            <NumericUpDown Value="{Binding Amount}"
+                           Minimum="0.01"
+                           Maximum="999999.99"
+                           Increment="0.01"
+                           FormatString="F2"
+                           HorizontalAlignment="Stretch"
+                           HorizontalContentAlignment="Right"
+                           VerticalContentAlignment="Center"
+                           Height="44"
+                           FontSize="14"
+                           Background="White"
+                           BorderBrush="#D1D5DB"
+                           BorderThickness="1"
+                           ShowButtonSpinner="False"
+                           Padding="12,0"
+                           CornerRadius="8"/>
+          </StackPanel>
+        </Grid>
+
+        <!-- Beneficiary Name and Contacts button -->
+        <StackPanel Spacing="8">
+          <TextBlock Text="Beneficiary Name"
+                     VerticalAlignment="Bottom"
+                     FontWeight="SemiBold"
+                     FontSize="14"
+                     Foreground="#374151"/>
+          <Grid ColumnDefinitions="*, Auto">
+            <TextBox Text="{Binding BeneficiaryName}"
+                     Watermark="Enter beneficiary name"
+                     HorizontalAlignment="Stretch"
+                     VerticalContentAlignment="Center"
+                     Height="52"
+                     FontSize="14"
+                     Background="White"
+                     BorderBrush="#D1D5DB"
+                     BorderThickness="1"
+                     CornerRadius="8"
+                     Padding="12,0"
+                     Margin="0 0 10 0"/>
+            <Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Background="{DynamicResource Lavender}" VerticalAlignment="Stretch" Name="BeneficiaryButton"
+                    Command="{Binding OpenDialogCommand}">
+              <PathIcon Data="{StaticResource ContactsRegular}" Foreground="{DynamicResource Charcoal}" />
+              <Button.Styles>
+                <Style Selector="Button:pointerover /template/ ContentPresenter, Button:pressed /template/ ContentPresenter">
+                  <Setter Property="Background" Value="#7392f9"/>
+                </Style>
+              </Button.Styles>
+            </Button>
+          </Grid>
+        </StackPanel>
+
+        <!-- Beneficiary IBAN -->
+        <StackPanel Spacing="8">
+          <TextBlock Text="Beneficiary IBAN"
+                     FontWeight="SemiBold"
+                     FontSize="14"
+                     Foreground="#374151"/>
+          <TextBox Text="{Binding BeneficiaryIban}"
+                   Watermark="GB29 NWBK 6016 1331 9268 19"
+                   HorizontalAlignment="Stretch"
+                   VerticalContentAlignment="Center"
+                   Height="52"
+                   FontSize="14"
+                   Background="White"
+                   BorderBrush="#D1D5DB"
+                   BorderThickness="1"
+                   CornerRadius="8"
+                   Padding="12,0"/>
+        </StackPanel>
+
+        <!-- Payment Reference -->
+        <StackPanel Spacing="8">
+          <TextBlock Text="Payment Reference"
+                     FontWeight="SemiBold"
+                     FontSize="14"
+                     Foreground="#374151"/>
+          <TextBox Text="{Binding PaymentReference}"
+                   Watermark="Enter payment reference"
+                   HorizontalAlignment="Stretch"
+                   VerticalContentAlignment="Center"
+                   Height="52"
+                   FontSize="14"
+                   Background="White"
+                   BorderBrush="#D1D5DB"
+                   BorderThickness="1"
+                   CornerRadius="8"
+                   Padding="12,0"/>
+        </StackPanel>
+
+        <!-- Submit Button -->
+        <Button Command="{Binding SubmitPaymentCommand}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Center"
+                Height="52"
+                FontSize="16"
+                FontWeight="SemiBold"
+                Background="{DynamicResource Lavender}"
+                Foreground="{DynamicResource Charcoal}"
+                BorderThickness="0"
+                CornerRadius="30"
+                Margin="0,16,0,0">
+          <Button.Styles>
+            <Style Selector="Button:pointerover /template/ ContentPresenter, Button:pressed /template/ ContentPresenter">
+              <Setter Property="Background" Value="#7392f9"/>
+            </Style>
+          </Button.Styles>
+          <Grid ColumnDefinitions="*">
+            <TextBlock Grid.Column="0" Text="Start Payment" HorizontalAlignment="Center" />
+            <PathIcon Grid.Column="0" Data="{DynamicResource ArrowRightRegular}" HorizontalAlignment="Right" Margin="0 0 15 0" Height="15" />
+          </Grid>
+        </Button>
+
+        <!-- Validation Summary -->
+        <Border Background="#FEF2F2"
+                BorderBrush="#FECACA"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16"
+                IsVisible="{Binding HasErrorsInner}">
+          <StackPanel Spacing="4">
+            <TextBlock Text="Please fix the following errors:"
+                       FontWeight="SemiBold"
+                       FontSize="14"
+                       Foreground="#DC2626"/>
+            <ItemsControl ItemsSource="{Binding Errors}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding}"
+                             FontSize="12"
+                             Foreground="#DC2626"
+                             Margin="0,2"/>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- Requested Payments List -->
+        <StackPanel Spacing="8" IsVisible="{Binding HasPayments}">
+          <TextBlock Text="Requested Payments"
+                     FontWeight="SemiBold"
+                     FontSize="16"
+                     Foreground="#374151"
+                     Margin="0,16,0,0"/>
+
+          <ItemsControl ItemsSource="{Binding RequestedPayments}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="White"
+                        BorderBrush="#D1D5DB"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Margin="0,0,0,8"
+                        Padding="16">
+                  <Grid ColumnDefinitions="*, Auto">
+                    <!-- Payment Info -->
+                    <StackPanel Grid.Column="0" Spacing="4">
+                      <TextBlock Text="{Binding Id}"
+                                 FontSize="12"
+                                 Foreground="#6B7280"/>
+                      <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#374151">
+                        <Run Text="{Binding DisplayAmount, StringFormat={}{0:F2}}"/>
+                        <Run Text=""/>
+                        <Run Text="{Binding Currency}"/>
+                      </TextBlock>
+                      <TextBlock Text="{Binding Reference}"
+                                 FontSize="12"
+                                 Foreground="#6B7280"/>
+                    </StackPanel>
+
+                    <!-- Reload Button -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                      <TextBlock Text="{Binding Status}" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold" Foreground="#374151" />
+                      <Button
+                              Command="{Binding $parent[ItemsControl].((vm:PaymentViewModel)DataContext).RefreshPaymentStatusCommand}"
+                              CommandParameter="{Binding}"
+                              Width="36"
+                              Height="36"
+                              Background="Transparent"
+                              BorderThickness="1"
+                              BorderBrush="#D1D5DB"
+                              CornerRadius="6"
+                              VerticalAlignment="Center"
+                              ToolTip.Tip="Refresh Status">
+                        <PathIcon Data="{DynamicResource ArrowSyncCircleRegular}"
+                                  Width="18"
+                                  Foreground="#6B7280"/>
+                        <Button.Styles>
+                          <Style Selector="Button:pointerover">
+                            <Setter Property="Background" Value="#F3F4F6"/>
+                            <Setter Property="BorderBrush" Value="#9CA3AF"/>
+                          </Style>
+                          <Style Selector="Button:pressed">
+                            <Setter Property="Background" Value="#E5E7EB"/>
+                          </Style>
+                        </Button.Styles>
+                      </Button>
+
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </dialogHost:DialogHost>
+</UserControl>

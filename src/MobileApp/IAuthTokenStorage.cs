@@ -1,0 +1,95 @@
+﻿using System;
+using System.IO;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+
+namespace MobileApp;
+
+public interface IAuthTokenStorage
+{
+    OAuthToken[]? LoadTokens();
+    Task StoreTokens(OAuthToken[] token);
+    Task<T?> Load<T>(string fileName);
+    Task Store<T>(string fileName, T blob);
+}
+
+public class AuthTokenStorage(ILogger<AuthTokenStorage> logger) : IAuthTokenStorage
+{
+    // TODO: use platform specific paths
+    private static string BasePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "TrueLayerMobile/");
+    private static string SecretsFolderPath => Path.Combine(BasePath, "secrets/");
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new() { WriteIndented = true };
+
+    public OAuthToken[]? LoadTokens()
+    {
+        try
+        {
+            var filePath = Path.Combine(SecretsFolderPath, "settings.json");
+            logger.LogInformation("Getting token from {FilePath}", filePath);
+
+            if (!File.Exists(filePath)) return null;
+
+            var data = File.ReadAllText(filePath);
+            return JsonSerializer.Deserialize<OAuthToken[]>(data);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Unable to read token from storage: {Message}", e.Message);
+            return null;
+        }
+    }
+
+    public async Task StoreTokens(OAuthToken[] token)
+    {
+        try
+        {
+            var filePath = Path.Combine(SecretsFolderPath, "settings.json");
+            logger.LogInformation("Storing token to {FolderPath}", filePath);
+            var serialized = JsonSerializer.Serialize(token, _jsonSerializerOptions);
+
+            if (!string.IsNullOrWhiteSpace(SecretsFolderPath))
+                Directory.CreateDirectory(SecretsFolderPath);
+
+            await File.WriteAllTextAsync(filePath, serialized).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Unable to store new token: {Message}", e.Message);
+        }
+    }
+
+    public async Task<T?> Load<T>(string fileName)
+    {
+        try
+        {
+            var filePath = Path.Combine(BasePath, fileName);
+            logger.LogInformation("Loading blob from {FolderPath}", filePath);
+            var data = await File.ReadAllTextAsync(filePath).ConfigureAwait(false);
+            return JsonSerializer.Deserialize<T>(data, _jsonSerializerOptions);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Unable to load blob: {Message}", e.Message);
+            return default;
+        }
+    }
+
+    public async Task Store<T>(string fileName, T blob)
+    {
+        try
+        {
+            var filePath = Path.Combine(BasePath, fileName);
+            logger.LogInformation("Storing blob to {FolderPath}", filePath);
+            var serialized = JsonSerializer.Serialize(blob, _jsonSerializerOptions);
+            await File.WriteAllTextAsync(filePath, serialized).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Unable to store blob: {Message}", e.Message);
+        }
+    }
+}
+
+public record OAuthToken(string ProviderId, string AccessToken, string TokenType, long ExpiresIn, string RefreshToken);
