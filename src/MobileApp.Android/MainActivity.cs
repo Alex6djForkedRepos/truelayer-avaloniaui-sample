@@ -6,6 +6,7 @@ using System.Reflection;
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using Android.Runtime;
 using Avalonia;
 using Avalonia.Android;
 using CommunityToolkit.Mvvm.Messaging;
@@ -36,14 +37,8 @@ namespace MobileApp.Android;
     DataPathPrefix = "",
     AutoVerify = true
 )]
-public class MainActivity : AvaloniaMainActivity<AndroidApp>
+public class MainActivity : AvaloniaMainActivity
 {
-    protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
-    {
-        return base.CustomizeAppBuilder(builder)
-            .WithInterFont();
-    }
-
     protected override void OnNewIntent(AndroidContent.Intent? intent)
     {
         base.OnNewIntent(intent);
@@ -97,6 +92,20 @@ public class MainActivity : AvaloniaMainActivity<AndroidApp>
         Console.WriteLine("Sending success message");
         var messenger = App.Instance.Services.GetRequiredService<IMessenger>();
         messenger.Send(new CallbackReceivedMessage(new CallbackReceivedEventArgs(queryParams)));
+    }
+}
+
+[Application]
+public class Application : AvaloniaAndroidApplication<AndroidApp>
+{
+    protected Application(nint javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
+    {
+    }
+
+    protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
+    {
+        return base.CustomizeAppBuilder(builder)
+            .WithInterFont();
     }
 }
 
