@@ -28,8 +28,8 @@ public partial class MainView : UserControl
 
         if (InsetsManager is not null)
         {
-            InsetsManager.DisplayEdgeToEdgePreference = false;
-            InsetsManager.IsSystemBarVisible = false;
+            // InsetsManager.DisplayEdgeToEdgePreference = true;
+            // InsetsManager.IsSystemBarVisible = true;
         }
 
         if (InputPane is not null)

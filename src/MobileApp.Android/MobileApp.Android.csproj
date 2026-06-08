@@ -9,6 +9,8 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <!-- Embed assemblies so `adb install` works standalone (no IDE fast-deployment push needed). -->
+<!--    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>-->
     <!--
         Used to solve Mono.AndroidTools.IncompatibleCpuAbiException: The package does not support the CPU architecture of this device.
         Haven't investigate why this is needed yet. Issue occured on Emulator Pixel 7 API 30, Android 11.0 ("R") | x86
