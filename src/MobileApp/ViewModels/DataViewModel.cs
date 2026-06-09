@@ -82,6 +82,21 @@ public partial class DataViewModel : ViewModelBase
             _ = GetAccountsAsync();
         });
 
+        messenger.Register<DataViewModel, SettingsRestoredMessage>(this, (_, _) =>
+        {
+            var tokens = _tokenStorage.LoadTokens();
+            if (tokens is null || tokens.Length == 0)
+            {
+                _logger.LogInformation("Token is null");
+                return;
+            }
+
+            Tokens.Clear();
+            Tokens.AddRange(tokens);
+
+            _ = RefreshTokenAsync();
+        });
+
         var tokens = _tokenStorage.LoadTokens();
         if (tokens is null || tokens.Length == 0)
         {

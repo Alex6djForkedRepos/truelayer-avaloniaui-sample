@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MobileApp.Models;
 
 namespace MobileApp;
 
@@ -12,6 +14,8 @@ public interface IAuthTokenStorage
     Task StoreTokens(OAuthToken[] token);
     Task<T?> Load<T>(string fileName);
     Task Store<T>(string fileName, T blob);
+    Task ExportSettings(Stream outputStream);
+    Task ImportSettings(Stream inputStream);
 }
 
 public class AuthTokenStorage(ILogger<AuthTokenStorage> logger) : IAuthTokenStorage
@@ -90,6 +94,24 @@ public class AuthTokenStorage(ILogger<AuthTokenStorage> logger) : IAuthTokenStor
             logger.LogError(e, "Unable to store blob: {Message}", e.Message);
         }
     }
+
+    public async Task ExportSettings(Stream outputStream)
+    {
+        var tokens = LoadTokens() ?? [];
+        var beneficiaries = await Load<List<BeneficiaryModel>>("beneficiaries.json") ?? [];
+        var backup = new SettingsBackup(1, tokens, beneficiaries);
+        await JsonSerializer.SerializeAsync(outputStream, backup, _jsonSerializerOptions);
+    }
+
+    public async Task ImportSettings(Stream inputStream)
+    {
+        var backup = await JsonSerializer.DeserializeAsync<SettingsBackup>(inputStream, _jsonSerializerOptions)
+            ?? throw new InvalidDataException("Invalid backup file");
+        await StoreTokens(backup.Tokens);
+        await Store("beneficiaries.json", backup.Beneficiaries);
+    }
+
+    private record SettingsBackup(int Version, OAuthToken[] Tokens, List<BeneficiaryModel> Beneficiaries);
 }
 
 public record OAuthToken(string ProviderId, string AccessToken, string TokenType, long ExpiresIn, string RefreshToken);

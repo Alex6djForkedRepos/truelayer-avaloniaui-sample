@@ -1,6 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MobileApp.Models;
@@ -23,6 +26,8 @@ public partial class SettingsViewModel : ViewModelBase
 
     public ObservableCollection<OAuthToken> Accounts { get; } = [];
 
+    [ObservableProperty] private string? _statusMessage;
+
     [RelayCommand]
     private async Task RemoveAccount(string providerId)
     {
@@ -40,5 +45,33 @@ public partial class SettingsViewModel : ViewModelBase
         if (tokens is null) return;
         Accounts.Clear();
         Accounts.AddRange(tokens);
+    }
+
+    public async Task ExportSettingsAsync(Stream outputStream)
+    {
+        try
+        {
+            await _storage.ExportSettings(outputStream);
+            StatusMessage = "Settings exported successfully.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Export failed: {ex.Message}";
+        }
+    }
+
+    public async Task ImportSettingsAsync(Stream inputStream)
+    {
+        try
+        {
+            await _storage.ImportSettings(inputStream);
+            RefreshAccounts();
+            StatusMessage = "Settings imported successfully.";
+            _messenger.Send(new SettingsRestoredMessage());
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Import failed: {ex.Message}";
+        }
     }
 }

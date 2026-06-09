@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading.Tasks;
 
 namespace MobileApp.Fakes;
@@ -15,4 +16,6 @@ public class FakeAuthTokenStorage : IAuthTokenStorage
     public Task StoreTokens(OAuthToken[] tokens) => Task.CompletedTask;
     public Task<T?> Load<T>(string fileName) => Task.FromResult(default(T));
     public Task Store<T>(string fileName, T blob) => Task.CompletedTask;
+    public Task ExportSettings(Stream outputStream) => Task.CompletedTask;
+    public Task ImportSettings(Stream inputStream) => Task.CompletedTask;
 }

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:MobileApp.ViewModels"
              xmlns:design="clr-namespace:MobileApp.ViewModels.Design"
+             xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
              mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="960"
              Background="{DynamicResource Charcoal}"
              x:Class="MobileApp.Views.SettingsView"
@@ -12,6 +13,11 @@
     <design:DesignSettingsViewModel />
   </Design.DataContext>
 
+  <dialogHost:DialogHost Identifier="SettingsDialogHost"
+                         CloseOnClickAway="True"
+                         Background="{DynamicResource Charcoal}"
+                         Foreground="{DynamicResource PureWhite}"
+                         dialogHost:DialogHostStyle.CornerRadius="12">
   <StackPanel Margin="20 5 20 20">
     <Grid ColumnDefinitions="Auto, *, Auto" Margin="0 5">
       <TextBlock Text="Accounts" VerticalAlignment="Center" Margin="0 0 5 0" FontSize="18" FontWeight="DemiBold" Foreground="{DynamicResource PureWhite}"/>
@@ -39,5 +45,19 @@
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
+
+    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 20 0 0">
+      <Button x:Name="ExportButton" Content="Export Settings"
+              Background="{DynamicResource Lavender}" Foreground="{DynamicResource Charcoal}"
+              FontWeight="DemiBold" CornerRadius="10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+      <Button x:Name="ImportButton" Content="Import Settings"
+              Background="{DynamicResource Lavender}" Foreground="{DynamicResource Charcoal}"
+              FontWeight="DemiBold" CornerRadius="10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+    </StackPanel>
+
+    <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource PureWhite}"
+               Margin="0 8 0 0"
+               IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
   </StackPanel>
+  </dialogHost:DialogHost>
 </UserControl>
