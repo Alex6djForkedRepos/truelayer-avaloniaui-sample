@@ -22,7 +22,7 @@ public interface IPaymentService
         OneOf<SchemeSelection.InstantOnly, SchemeSelection.InstantPreferred, SchemeSelection.UserSelected>?
             paymentScheme);
 
-    void CreateHostedPaymentPageLink(PaymentModel payment);
+    void NavigateToPaymentRedirectUri(PaymentModel payment);
 
     Task<string?> GetPaymentStatus(string paymentId);
 }
@@ -44,8 +44,8 @@ public class PaymentService(
         var paymentRequest = new CreatePaymentRequest(
             amountInMinor: amount.ToMinorCurrencyUnit(2),
             currency: currency,
-            paymentMethod: new PaymentMethod.BankTransfer(
-                new Provider.UserSelected
+            paymentMethod: new CreatePaymentMethod.BankTransfer(
+                new CreateProviderSelection.UserSelected
                 {
                     Filter = new ProviderFilter
                     {
@@ -61,7 +61,8 @@ public class PaymentService(
                 )
             ),
             // TODO: Make email configurable
-            user: new PaymentUserRequest(name: beneficiaryIban, email: "user@example.com")
+            user: new PaymentUserRequest(name: beneficiaryIban, email: "user@example.com"),
+            hostedPage: new HostedPageRequest(new Uri(redirectManager.RedirectUri))
         );
 
         var apiResponse = await tlClient.Payments.CreatePayment(
@@ -94,6 +95,7 @@ public class PaymentService(
                 Amount = amount.ToMinorCurrencyUnit(2),
                 Currency = currency,
                 ResourceToken = authorizationRequired.ResourceToken,
+                HostedPageUri = authorizationRequired.HostedPage?.Uri,
             };
         }
 
@@ -114,17 +116,18 @@ public class PaymentService(
         return null;
     }
 
-    public void CreateHostedPaymentPageLink(PaymentModel payment)
+    public void NavigateToPaymentRedirectUri(PaymentModel payment)
     {
         ArgumentException.ThrowIfNullOrEmpty(payment.ResourceToken);
 
-        var hostedPaymentPageUrl = tlClient.Payments.CreateHostedPaymentPageLink(
-            payment.Id,
-            payment.ResourceToken,
-            new Uri(redirectManager.RedirectUri));
+        if (payment.HostedPageUri is null)
+        {
+            logger.LogError("Hosted payment page URI is null for payment ID: {PaymentId}", payment.Id);
+            return;
+        }
 
-        logger.LogInformation("Hosted Payment Page URL: {HppUrl}", hostedPaymentPageUrl);
-        redirectManager.NavigateToRedirectUri(new Uri(hostedPaymentPageUrl));
+        logger.LogInformation("Hosted Payment Page URL: {HppUrl}", payment.HostedPageUri.AbsoluteUri);
+        redirectManager.NavigateToRedirectUri(payment.HostedPageUri);
     }
 
     public async Task<string?> GetPaymentStatus(string paymentId)

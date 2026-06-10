@@ -99,7 +99,7 @@ public class FakePaymentsApi : IPaymentsApi
         throw new NotImplementedException();
     }
 
-    public Task<ApiResponse<OneOf<RefundPending, RefundAuthorized>>> GetPaymentRefund(string paymentId, string refundId, CancellationToken cancellationToken = new())
+    public Task<ApiResponse<OneOf<RefundPending, RefundAuthorized, RefundExecuted, RefundFailed>>> GetPaymentRefund(string paymentId, string refundId, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }

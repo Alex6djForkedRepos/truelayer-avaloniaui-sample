@@ -30,7 +30,7 @@ public class FakePaymentService(
         return Task.FromResult(paymentModel)!;
     }
 
-    public void CreateHostedPaymentPageLink(PaymentModel payment)
+    public void NavigateToPaymentRedirectUri(PaymentModel payment)
     {
         redirectManager.NavigateToRedirectUri(new Uri("https://example.com/redirect?payment_id=" + payment.Id));
     }

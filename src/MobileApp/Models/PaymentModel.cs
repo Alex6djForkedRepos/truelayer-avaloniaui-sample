@@ -1,4 +1,6 @@
-﻿namespace MobileApp.Models;
+﻿using System;
+
+namespace MobileApp.Models;
 
 public record PaymentModel
 {
@@ -12,6 +14,7 @@ public record PaymentModel
     public required long Amount { get; set; }
     public required string Currency { get; set; }
     public string? ResourceToken { get; set; }
+    public Uri? HostedPageUri { get; set; }
 
     // Display amount in decimal format (converting from minor currency units)
     public decimal DisplayAmount => Amount / 100.0m;

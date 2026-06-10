@@ -170,7 +170,7 @@ public partial class PaymentViewModel : ObservableValidator
         RequestedPayments.Add(payment);
 
         // TODO: this also opens a browser window, better decouple this
-        _paymentService.CreateHostedPaymentPageLink(payment);
+        _paymentService.NavigateToPaymentRedirectUri(payment);
     }
 
     private async Task GetPaymentStatus(string paymentId)
