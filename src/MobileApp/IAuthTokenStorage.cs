@@ -107,6 +107,11 @@ public class AuthTokenStorage(ILogger<AuthTokenStorage> logger) : IAuthTokenStor
     {
         var backup = await JsonSerializer.DeserializeAsync<SettingsBackup>(inputStream, _jsonSerializerOptions)
             ?? throw new InvalidDataException("Invalid backup file");
+
+        // TODO:
+        // either surface exceptions from Store/StoreTokens so the caller can react,
+        // or write both to a temporary location and rename atomically,
+        // or at minimum check return state and set a distinct error StatusMessage.
         await StoreTokens(backup.Tokens);
         await Store("beneficiaries.json", backup.Beneficiaries);
     }

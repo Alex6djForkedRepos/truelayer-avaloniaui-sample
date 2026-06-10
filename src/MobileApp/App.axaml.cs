@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -10,6 +13,9 @@ using Microsoft.Extensions.Logging;
 using MobileApp.ViewModels;
 using MobileApp.Views;
 using TrueLayer.Caching;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace MobileApp;
 
@@ -20,6 +26,8 @@ public abstract class App : Application
 
     public static App Instance => (Current as App)!;
     public ServiceProvider Services { get; private set; } = null!;
+
+    public static readonly ActivitySource Source = new("TrueMobile");
 
     public override void Initialize()
     {
@@ -33,6 +41,9 @@ public abstract class App : Application
     protected abstract void RegisterPlatformServices(IServiceCollection services);
     protected abstract void PlatformConfiguration(ConfigurationBuilder builder);
     protected abstract string ReadResourceFile(string resourceName);
+    protected virtual string DeviceId => Environment.MachineName;
+    protected virtual string DeviceName => Environment.MachineName;
+    protected virtual string DeviceType => Environment.OSVersion.ToString();
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -41,6 +52,10 @@ public abstract class App : Application
             base.OnFrameworkInitializationCompleted();
             return;
         }
+
+#if DEBUG
+        _ = new OtelDiagnosticsListener();
+#endif
 
         var configBuilder = new ConfigurationBuilder();
 
@@ -68,9 +83,52 @@ public abstract class App : Application
                 },
                 authTokenCachingStrategy: AuthTokenCachingStrategies.InMemory);
 
+
+        services.AddOpenTelemetry()
+            .WithTracing(tracerProviderBuilder =>
+            {
+                tracerProviderBuilder
+                    .AddSource("TrueMobile") // used inside library.name for custom activities
+                    .SetSampler(new AlwaysOnSampler())
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                        .AddService("true-mobile",
+                            serviceVersion: "0.1.0") // the service name is also used for the Honeycomb dataset
+                        .AddAttributes(new Dictionary<string, object>
+                        {
+                            ["deployment.environment"] = "Development", // builder.Environment.EnvironmentName,
+                            ["service.instance.id"] = DeviceId,
+                            ["device.model.name"] = DeviceName,
+                            ["device.type"] = DeviceType,
+                        }))
+                    .AddHttpClientInstrumentation(options =>
+                    {
+                        options.RecordException = true;
+                        options.EnrichWithHttpRequestMessage = (activity, request) =>
+                        {
+                            activity.DisplayName = $"{request.Method.Method} {request.RequestUri}";
+                        };
+                    })
+                    .AddOtlpExporter(options =>
+                    {
+                        // Honeycomb configuration
+                        options.Endpoint = new Uri(config["Honeycomb:Endpoint"]
+                                                   ?? throw new InvalidOperationException("NULL Honeycomb:Endpoint configuration value"));
+                        options.Protocol = OtlpExportProtocol.HttpProtobuf;
+                        options.Headers = $"x-honeycomb-team={config["Honeycomb:ApiKey"]
+                                                              ?? throw new InvalidOperationException("NULL Honeycomb:ApiKey configuration value")}";
+                    })
+#if DEBUG
+                    .AddConsoleExporter()
+#endif
+                    ;
+            });
+
         RegisterPlatformServices(services);
 
         Services = services.BuildServiceProvider();
+
+        // no IHost in Avalonia — force OTel initialization
+        Services.GetRequiredService<TracerProvider>();
 
         var viewModel = Services.GetRequiredService<MainViewModel>();
 
@@ -81,6 +139,7 @@ public abstract class App : Application
                 {
                     DataContext = viewModel,
                 };
+                desktop.Exit += (_, _) => Services.Dispose();
                 break;
             case ISingleViewApplicationLifetime singleViewPlatform:
                 singleViewPlatform.MainView = new MainView

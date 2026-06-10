@@ -28,7 +28,7 @@ public class DesktopApp : App
 {
     protected override string ReadResourceFile(string resourceName)
     {
-        return File.ReadAllText(resourceName);
+        return File.ReadAllText(Path.Combine(AppContext.BaseDirectory, resourceName));
     }
 
     protected override void RegisterPlatformServices(IServiceCollection services)

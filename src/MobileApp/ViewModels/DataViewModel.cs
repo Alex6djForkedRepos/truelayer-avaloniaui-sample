@@ -112,6 +112,9 @@ public partial class DataViewModel : ViewModelBase
     [RelayCommand]
     private async Task ExchangeCode(string code)
     {
+        using var activity = App.Source.StartActivity();
+        activity?.SetTag("av.operation", "exchange-code");
+
         if (string.IsNullOrWhiteSpace(code))
         {
             Errors.Add("Code cannot be empty.");
@@ -140,11 +143,16 @@ public partial class DataViewModel : ViewModelBase
     [RelayCommand]
     private async Task RefreshTokenAsync()
     {
+        using var activity = App.Source.StartActivity();
+        activity?.SetTag("av.operation", "refresh-token");
+
         Balances.Clear();
         Loading = true;
         var responses = new List<ExchangeCodeResponse>();
         var invalidTokens = new List<OAuthToken>();
-        foreach (var oAuthToken in Tokens)
+        // snapshot the list before iterating
+        // so the enumerator is over a private copy and mutations to Tokens mid-await cannot affect it.
+        foreach (var oAuthToken in Tokens.ToList())
         {
             var response = await _tlClient.Auth.RefreshToken(oAuthToken.RefreshToken);
 
