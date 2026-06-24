@@ -1,23 +1,21 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace MobileApp.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private readonly PaymentViewModel _paymentViewModel;
-    private readonly DataViewModel _dataViewModel;
-    private readonly SettingsViewModel _settingsViewModel;
+    [ObservableProperty] private PaymentViewModel _paymentViewModel;
+    [ObservableProperty] private DataViewModel _dataViewModel;
+    [ObservableProperty] private SettingsViewModel _settingsViewModel;
 
     public MainViewModel(PaymentViewModel paymentViewModel, DataViewModel dataViewModel, SettingsViewModel settingsViewModel)
     {
         _paymentViewModel = paymentViewModel;
         _dataViewModel = dataViewModel;
         _settingsViewModel = settingsViewModel;
-
-        _currentPage = dataViewModel;
 
         DataButtonFontWeight = SelectedFontWeight;
         PaymentsButtonFontWeight = DefaultFontWeight;
@@ -27,32 +25,6 @@ public partial class MainViewModel : ViewModelBase
         PaymentsButtonForeground = _defaultButtonForeground;
         SettingsButtonForeground = _defaultButtonForeground;
     }
-
-    [ObservableProperty]
-    private string? _selectedListItem;
-    partial void OnSelectedListItemChanged(string? value)
-    {
-        if (value is null) return;
-
-        ObservableObject? vm = value switch
-        {
-            "Payments" => _paymentViewModel,
-            "Data" => _dataViewModel,
-            "Settings" => _settingsViewModel,
-            _ => null,
-        };
-
-        if (vm is null) return;
-
-        CurrentPage = vm;
-        IsPaneOpen = false;
-    }
-
-    [ObservableProperty]
-    private bool _isPaneOpen;
-
-    [ObservableProperty]
-    private ObservableObject _currentPage;
 
     private Thickness _safeArea = new(0);
     public Thickness SafeArea
@@ -65,10 +37,17 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
-    private void TriggerPane()
+    public void OnSelectionChanged(object? sender, PageSelectionChangedEventArgs e)
     {
-        IsPaneOpen = !IsPaneOpen;
+        if (e.CurrentPage?.Header?.ToString() is not { } header) return;
+
+        DataButtonFontWeight = header == "Data" ? SelectedFontWeight : DefaultFontWeight;
+        PaymentsButtonFontWeight = header == "Payments" ? SelectedFontWeight : DefaultFontWeight;
+        SettingsButtonFontWeight = header == "Settings" ? SelectedFontWeight : DefaultFontWeight;
+
+        DataButtonForeground = header == "Data" ? _selectedButtonForeground : _defaultButtonForeground;
+        PaymentsButtonForeground = header == "Payments" ? _selectedButtonForeground : _defaultButtonForeground;
+        SettingsButtonForeground = header == "Settings" ? _selectedButtonForeground : _defaultButtonForeground;
     }
 
     private const FontWeight SelectedFontWeight = FontWeight.Bold;
@@ -84,46 +63,4 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private IBrush _dataButtonForeground;
     [ObservableProperty] private IBrush _paymentsButtonForeground;
     [ObservableProperty] private IBrush _settingsButtonForeground;
-
-    [RelayCommand]
-    private void OpenDataPage()
-    {
-        SelectedListItem = "Data";
-
-        DataButtonFontWeight = SelectedFontWeight;
-        PaymentsButtonFontWeight = DefaultFontWeight;
-        SettingsButtonFontWeight = DefaultFontWeight;
-
-        DataButtonForeground = _selectedButtonForeground;
-        PaymentsButtonForeground = _defaultButtonForeground;
-        SettingsButtonForeground = _defaultButtonForeground;
-    }
-
-    [RelayCommand]
-    private void OpenPaymentsPage()
-    {
-        SelectedListItem = "Payments";
-
-        PaymentsButtonFontWeight = SelectedFontWeight;
-        DataButtonFontWeight = DefaultFontWeight;
-        SettingsButtonFontWeight = DefaultFontWeight;
-
-        PaymentsButtonForeground = _selectedButtonForeground;
-        DataButtonForeground = _defaultButtonForeground;
-        SettingsButtonForeground = _defaultButtonForeground;
-    }
-
-    [RelayCommand]
-    private void OpenSettingsPage()
-    {
-        SelectedListItem = "Settings";
-
-        SettingsButtonFontWeight = SelectedFontWeight;
-        DataButtonFontWeight = DefaultFontWeight;
-        PaymentsButtonFontWeight = DefaultFontWeight;
-
-        SettingsButtonForeground = _selectedButtonForeground;
-        DataButtonForeground = _defaultButtonForeground;
-        PaymentsButtonForeground = _defaultButtonForeground;
-    }
 }

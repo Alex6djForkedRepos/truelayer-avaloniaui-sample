@@ -1,48 +1,31 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+<TabbedPage xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:MobileApp.ViewModels"
              xmlns:design="clr-namespace:MobileApp.ViewModels.Design"
              mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="960"
-             Padding="{Binding SafeArea}"
-             TopLevel.AutoSafeAreaPadding="True"
              x:Class="MobileApp.Views.MainView"
-             x:DataType="vm:MainViewModel">
+             x:DataType="vm:MainViewModel"
+             SelectionChanged="OnSelectionChanged">
   <Design.DataContext>
     <design:DesignMainViewModel />
   </Design.DataContext>
 
-  <Grid RowDefinitions="*, Auto" Background="{DynamicResource Charcoal}">
+  <ContentPage Header="Data" Content="{Binding DataViewModel}">
+    <ContentPage.Icon>
+      <PathIcon Data="{DynamicResource BuildingBankRegular}"/>
+    </ContentPage.Icon>
+  </ContentPage>
+  <ContentPage Header="Payments" Content="{Binding PaymentViewModel}">
+    <ContentPage.Icon>
+      <PathIcon Data="{DynamicResource PaymentRegular}"/>
+    </ContentPage.Icon>
+  </ContentPage>
+  <ContentPage Header="Settings" Content="{Binding SettingsViewModel}">
+    <ContentPage.Icon>
+      <PathIcon Data="{DynamicResource SettingsRegular}"/>
+    </ContentPage.Icon>
+  </ContentPage>
 
-    <TransitioningContentControl Content="{Binding CurrentPage}" />
-
-    <Grid Grid.Row="1" ColumnDefinitions="*, *, *" Background="{DynamicResource Lavender}" Name="BottomBar">
-      <Button HorizontalAlignment="Stretch" Command="{Binding OpenDataPageCommand}"
-              Background="Transparent"
-              BorderBrush="Transparent">
-        <StackPanel Orientation="Vertical" Spacing="5" Margin="5">
-          <PathIcon Data="{DynamicResource BuildingBankRegular}" Width="25" Height="25" Foreground="{Binding DataButtonForeground}"/>
-          <TextBlock Text="Data" HorizontalAlignment="Center" FontSize="12" FontWeight="{Binding DataButtonFontWeight}" Margin="2 0 0 0" Foreground="{Binding DataButtonForeground}"/>
-        </StackPanel>
-      </Button>
-      <Button Grid.Column="1" HorizontalAlignment="Stretch" Command="{Binding OpenPaymentsPageCommand}"
-              Background="Transparent"
-              BorderBrush="Transparent">
-        <StackPanel Orientation="Vertical" Spacing="5" Margin="5">
-          <PathIcon Data="{DynamicResource PaymentRegular}" Width="25" Height="25" Foreground="{Binding PaymentsButtonForeground}"/>
-          <TextBlock Text="Payments" HorizontalAlignment="Center" FontSize="12" FontWeight="{Binding PaymentsButtonFontWeight}" Foreground="{Binding PaymentsButtonForeground}"/>
-        </StackPanel>
-      </Button>
-      <Button Grid.Column="2" HorizontalAlignment="Stretch" Command="{Binding OpenSettingsPageCommand}"
-              Background="Transparent"
-              BorderBrush="Transparent">
-        <StackPanel Orientation="Vertical" Spacing="5" Margin="5">
-          <PathIcon Data="{DynamicResource SettingsRegular}" Width="25" Height="25" Foreground="{Binding SettingsButtonForeground}"/>
-          <TextBlock Text="Settings" HorizontalAlignment="Center" FontSize="12" FontWeight="{Binding SettingsButtonFontWeight}" Foreground="{Binding SettingsButtonForeground}"/>
-        </StackPanel>
-      </Button>
-    </Grid>
-  </Grid>
-
-</UserControl>
+</TabbedPage>

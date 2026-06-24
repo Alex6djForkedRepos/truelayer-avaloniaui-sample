@@ -142,11 +142,17 @@ public abstract class App : Application
                 desktop.Exit += (_, _) => Services.Dispose();
                 break;
             case ISingleViewApplicationLifetime singleViewPlatform:
-                singleViewPlatform.MainView = new MainView
+                singleViewPlatform.MainView = new PageNavigationHost()
                 {
-                    DataContext = viewModel,
+                    Page = new MainView { DataContext = viewModel }
                 };
                 break;
+            // case IActivityApplicationLifetime singleViewFactoryApplicationLifetime:
+            //     singleViewFactoryApplicationLifetime.MainViewFactory = () => new PageNavigationHost()
+            //     {
+            //         Page = new MainView { DataContext = viewModel }
+            //     };
+            //     break;
         }
 
         base.OnFrameworkInitializationCompleted();

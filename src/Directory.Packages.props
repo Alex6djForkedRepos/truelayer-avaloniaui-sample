@@ -1,7 +1,9 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <AvaloniaVersion>12.0.4</AvaloniaVersion>
+      <AvaloniaVersion>12.0.5</AvaloniaVersion>
+      <MSExtensionsVersion>10.0.9</MSExtensionsVersion>
+      <OTELVersion>1.16.0</OTELVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
@@ -11,24 +13,24 @@
     <PackageVersion Include="Avalonia.iOS" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Browser" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Android" Version="$(AvaloniaVersion)" />
-    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1" />
+    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="DialogHost.Avalonia" Version="0.12.2" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.7" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.15.3" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
-    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MSExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(MSExtensionsVersion)" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="$(OTELVersion)" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="$(OTELVersion)" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="$(OTELVersion)" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="$(OTELVersion)" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
     <PackageVersion Include="TrueLayer.Client" Version="1.22.0" />
-    <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.16" />
+    <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.2.0.2" />
     <!--  These references won't be needed anymore when we reference the TrueLayer.Client back -->
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(MSExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(MSExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(MSExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MSExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="$(MSExtensionsVersion)" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="TrueLayer.Signing" Version="0.2.5" />
   </ItemGroup>
